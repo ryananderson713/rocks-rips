@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0a0e27" />
+<title>Rocks Rips — Live Pokémon Breaks on Whatnot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Russo+One&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0e27;
+    --ink-2: #131a3a;
+    --ink-3: #1a2249;
+    --gold: #ffcb05;
+    --gold-deep: #b3a125;
+    --red: #ee1515;
+    --red-deep: #cc0000;
+    --blue: #3b4cca;
+    --electric: #fff200;
+    --psychic: #f366b9;
+    --grass: #78c850;
+    --fire: #f08030;
+    --water: #6890f0;
+    --dragon: #7038f8;
+    --paper: #fffaee;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    overflow-x: hidden;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(243, 102, 185, 0.18), transparent 50%),
+      radial-gradient(ellipse at 80% 30%, rgba(59, 76, 202, 0.25), transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(255, 203, 5, 0.12), transparent 60%),
+      var(--ink);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Pokéball pattern overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 10% 15%, rgba(255,255,255,0.04) 1px, transparent 1.5px),
+      radial-gradient(circle at 75% 60%, rgba(255,255,255,0.03) 1px, transparent 1.5px),
+      radial-gradient(circle at 40% 85%, rgba(255,255,255,0.04) 1px, transparent 1.5px);
+    background-size: 80px 80px, 120px 120px, 100px 100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    max-width: 440px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding-bottom: 80px;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10, 14, 39, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 203, 5, 0.2);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Bungee', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo .pokeball {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--red) 0% 50%, #fff 50% 100%);
+    border: 2px solid #0a0e27;
+    position: relative;
+    box-shadow: 0 0 0 1.5px #fff, 0 4px 12px rgba(238, 21, 21, 0.5);
+    animation: wiggle 3s ease-in-out infinite;
+  }
+
+  .logo .pokeball::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #0a0e27;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .logo .pokeball::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #0a0e27;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes wiggle {
+    0%, 90%, 100% { transform: rotate(0deg); }
+    93% { transform: rotate(-15deg); }
+    96% { transform: rotate(15deg); }
+  }
+
+  .logo-text {
+    background: linear-gradient(135deg, var(--gold) 0%, #fff 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(255, 203, 5, 0.3));
+  }
+
+  .menu-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 203, 5, 0.1);
+    border: 1px solid rgba(255, 203, 5, 0.3);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.3s var(--ease);
+  }
+
+  .menu-btn:active { transform: scale(0.92); background: rgba(255, 203, 5, 0.25); }
+
+  .menu-btn span {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 2px;
+    box-shadow: 0 -5px 0 var(--gold), 0 5px 0 var(--gold);
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 32px 20px 24px;
+    text-align: center;
+    position: relative;
+  }
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-deep) 100%);
+    padding: 7px 14px 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(238, 21, 21, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    margin-bottom: 18px;
+    animation: livePulse 2s ease-in-out infinite;
+  }
+
+  .live-pill::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+    animation: dot 1.5s ease-in-out infinite;
+  }
+
+  @keyframes dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.8); }
+    50% { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+  }
+
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(238, 21, 21, 0.4), inset 0 1px 0 rgba(255,255,255,0.3); }
+    50% { box-shadow: 0 4px 30px rgba(238, 21, 21, 0.7), inset 0 1px 0 rgba(255,255,255,0.3); }
+  }
+
+  .hero h1 {
+    font-family: 'Bungee', sans-serif;
+    font-size: clamp(40px, 11vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+    background: linear-gradient(180deg, #fff 0%, var(--gold) 50%, var(--gold-deep) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 40px rgba(255, 203, 5, 0.3);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  }
+
+  .hero .tag {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 250, 238, 0.6);
+    margin-bottom: 22px;
+  }
+
+  .hero .tag span { color: var(--gold); }
+
+  /* CTA buttons */
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 16px 12px;
+    border-radius: 14px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--red) 0%, #ff3838 50%, var(--red-deep) 100%);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(238, 21, 21, 0.45), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(0,0,0,0.2);
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shine 3s infinite;
+  }
+
+  @keyframes shine {
+    0%, 60% { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  .btn-secondary {
+    background: rgba(255, 203, 5, 0.12);
+    color: var(--gold);
+    border: 1.5px solid rgba(255, 203, 5, 0.4);
+    backdrop-filter: blur(10px);
+  }
+
+  .btn:active { transform: scale(0.96); }
+
+  /* ============ STATS BAND ============ */
+  .stats {
+    margin: 28px 18px 0;
+    padding: 18px 14px;
+    background: linear-gradient(135deg, rgba(255, 203, 5, 0.08) 0%, rgba(59, 76, 202, 0.08) 100%);
+    border: 1px solid rgba(255, 203, 5, 0.2);
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    position: relative;
+  }
+
+  .stats::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--gold), transparent 30%, transparent 70%, var(--psychic));
+    -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 1px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .stat {
+    text-align: center;
+    position: relative;
+  }
+
+  .stat:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 20%;
+    bottom: 20%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(255, 203, 5, 0.3), transparent);
+  }
+
+  .stat .num {
+    font-family: 'Bungee', sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat .label {
+    font-size: 9.5px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 250, 238, 0.55);
+    font-weight: 600;
+  }
+
+  /* ============ SECTION HEADERS ============ */
+  .section {
+    padding: 36px 18px 0;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-family: 'Bungee', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+  }
+
+  .section-title em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .section-link {
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0.85;
+  }
+
+  /* ============ NEXT BREAK CARD ============ */
+  .next-break {
+    background:
+      radial-gradient(circle at 80% 0%, rgba(255, 203, 5, 0.25), transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(243, 102, 185, 0.2), transparent 60%),
+      linear-gradient(135deg, var(--ink-2) 0%, var(--ink-3) 100%);
+    border: 1px solid rgba(255, 203, 5, 0.25);
+    border-radius: 22px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .next-break::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: conic-gradient(from 0deg, var(--gold), var(--psychic), var(--blue), var(--gold));
+    filter: blur(60px);
+    opacity: 0.3;
+    animation: spin 12s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .break-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .break-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--fire) 100%);
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    box-shadow: 0 8px 24px rgba(240, 128, 48, 0.4);
+    flex-shrink: 0;
+  }
+
+  .break-meta { flex: 1; min-width: 0; }
+
+  .break-set {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .break-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 18px;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .break-time {
+    font-size: 12px;
+    color: rgba(255, 250, 238, 0.6);
+  }
+
+  /* Countdown */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .count-box {
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid rgba(255, 203, 5, 0.2);
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .count-num {
+    font-family: 'Bungee', sans-serif;
+    font-size: 22px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .count-lbl {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 250, 238, 0.5);
+    font-weight: 600;
+  }
+
+  .break-cta {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--gold) 0%, #ffd900 100%);
+    color: var(--ink);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 203, 5, 0.4), inset 0 -2px 0 rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s var(--ease);
+  }
+
+  .break-cta:active { transform: scale(0.97); }
+
+  /* ============ BREAK TYPES ============ */
+  .types-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .type-card {
+    aspect-ratio: 1 / 1.15;
+    border-radius: 18px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s var(--ease);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .type-card:active { transform: scale(0.96); }
+
+  .type-card .emoji {
+    font-size: 36px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  }
+
+  .type-card h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 15px;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+
+  .type-card p {
+    font-size: 11px;
+    line-height: 1.3;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .type-card .price {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .type-fire {
+    background: linear-gradient(135deg, #ff6b35 0%, #c1272d 100%);
+    box-shadow: 0 8px 24px rgba(240, 128, 48, 0.3);
+  }
+
+  .type-water {
+    background: linear-gradient(135deg, #4a90e2 0%, #2c3e8c 100%);
+    box-shadow: 0 8px 24px rgba(104, 144, 240, 0.3);
+  }
+
+  .type-electric {
+    background: linear-gradient(135deg, #f9d71c 0%, #f08c00 100%);
+    box-shadow: 0 8px 24px rgba(255, 203, 5, 0.3);
+    color: #2a1a00;
+  }
+
+  .type-electric h3 { color: #2a1a00; }
+  .type-electric p { color: rgba(42, 26, 0, 0.7); }
+  .type-electric .price { background: rgba(255,255,255,0.3); color: #2a1a00; border-color: rgba(0,0,0,0.2); }
+
+  .type-psychic {
+    background: linear-gradient(135deg, #f366b9 0%, #7038f8 100%);
+    box-shadow: 0 8px 24px rgba(243, 102, 185, 0.3);
+  }
+
+  /* Holo shimmer effect */
+  .type-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.25) 50%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .type-card:hover::before { opacity: 1; animation: holoSlide 1.2s ease; }
+
+  @keyframes holoSlide {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
+  /* ============ SCHEDULE ============ */
+  .schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .schedule-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.3s var(--ease);
+  }
+
+  .schedule-item:active {
+    background: rgba(255, 203, 5, 0.08);
+    border-color: rgba(255, 203, 5, 0.3);
+  }
+
+  .sched-date {
+    flex-shrink: 0;
+    width: 52px;
+    text-align: center;
+    background: rgba(255, 203, 5, 0.1);
+    border: 1px solid rgba(255, 203, 5, 0.25);
+    border-radius: 10px;
+    padding: 6px 4px;
+  }
+
+  .sched-day {
+    font-family: 'Bungee', sans-serif;
+    font-size: 18px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .sched-mo {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 203, 5, 0.7);
+    margin-top: 3px;
+    font-weight: 700;
+  }
+
+  .sched-info { flex: 1; min-width: 0; }
+
+  .sched-set {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--psychic);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .sched-name {
+    font-family: 'Russo One', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sched-time {
+    font-size: 11px;
+    color: rgba(255, 250, 238, 0.55);
+  }
+
+  .sched-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  /* ============ ABOUT THE BREAKER ============ */
+  .breaker {
+    margin: 36px 18px 0;
+    background: linear-gradient(135deg, rgba(59, 76, 202, 0.15) 0%, rgba(112, 56, 248, 0.15) 100%);
+    border: 1px solid rgba(112, 56, 248, 0.3);
+    border-radius: 22px;
+    padding: 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .breaker::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(112, 56, 248, 0.4), transparent 70%);
+    filter: blur(40px);
+  }
+
+  .avatar {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--fire));
+    display: grid;
+    place-items: center;
+    font-family: 'Bungee', sans-serif;
+    font-size: 32px;
+    color: var(--ink);
+    border: 3px solid rgba(255, 203, 5, 0.4);
+    box-shadow: 0 0 0 4px rgba(255, 203, 5, 0.1), 0 12px 32px rgba(255, 203, 5, 0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .breaker h3 {
+    font-family: 'Bungee', sans-serif;
+    font-size: 20px;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .breaker .handle {
+    font-family: 'Russo One', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .breaker p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 250, 238, 0.8);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .breaker-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .bs-item .bs-num {
+    font-family: 'Bungee', sans-serif;
+    font-size: 20px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .bs-item .bs-lbl {
+    font-size: 9.5px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 250, 238, 0.55);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* ============ HOW IT WORKS ============ */
+  .how-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .how-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .how-num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--fire));
+    color: var(--ink);
+    font-family: 'Bungee', sans-serif;
+    font-size: 16px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 12px rgba(255, 203, 5, 0.3);
+  }
+
+  .how-text h4 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+
+  .how-text p {
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 250, 238, 0.7);
+  }
+
+  /* ============ CTA BANNER ============ */
+  .cta-banner {
+    margin: 36px 18px 0;
+    padding: 28px 20px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 203, 5, 0.25), transparent 60%),
+      linear-gradient(135deg, var(--red-deep) 0%, var(--blue) 100%);
+    border-radius: 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 203, 5, 0.3);
+  }
+
+  .cta-banner::before {
+    content: '⚡';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.07;
+    top: -40px;
+    right: -30px;
+    transform: rotate(15deg);
+  }
+
+  .cta-banner h2 {
+    font-family: 'Bungee', sans-serif;
+    font-size: 26px;
+    line-height: 1;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #fff, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-banner p {
+    font-size: 13px;
+    color: rgba(255, 250, 238, 0.85);
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.45;
+  }
+
+  .cta-banner .btn-primary {
+    display: block;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    margin-top: 40px;
+    padding: 24px 18px 16px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 203, 5, 0.15);
+  }
+
+  .foot-links {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 14px;
+  }
+
+  .foot-links a {
+    color: var(--gold);
+    text-decoration: none;
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .copyright {
+    font-size: 11px;
+    color: rgba(255, 250, 238, 0.4);
+    line-height: 1.5;
+  }
+
+  .copyright span { color: var(--gold); }
+
+  /* ============ FLOATING POKEBALL DECORATIONS ============ */
+  .float-ball {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--red) 0% 50%, #fff 50% 100%);
+    border: 4px solid var(--ink);
+    pointer-events: none;
+    opacity: 0.08;
+    z-index: 0;
+  }
+
+  .float-ball::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    height: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .float-ball.fb1 { top: 15%; right: -25px; animation: floatA 8s ease-in-out infinite; }
+  .float-ball.fb2 { top: 55%; left: -30px; width: 80px; height: 80px; animation: floatB 10s ease-in-out infinite; }
+  .float-ball.fb3 { bottom: 20%; right: -20px; width: 50px; height: 50px; animation: floatA 7s ease-in-out infinite reverse; }
+
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-30px) rotate(180deg); }
+  }
+
+  @keyframes floatB {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(40px) rotate(-180deg); }
+  }
+
+  /* Reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: reveal 0.7s var(--ease) forwards;
+  }
+
+  .reveal:nth-child(1) { animation-delay: 0.1s; }
+  .reveal:nth-child(2) { animation-delay: 0.2s; }
+  .reveal:nth-child(3) { animation-delay: 0.3s; }
+  .reveal:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating decorative pokéballs -->
+<div class="float-ball fb1"></div>
+<div class="float-ball fb2"></div>
+<div class="float-ball fb3"></div>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="pokeball"></div>
+      <span class="logo-text">ROCK'S RIPS</span>
+    </div>
+    <button class="menu-btn" aria-label="Menu"><span></span></button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="live-pill">Live on Whatnot</div>
+    <h1 class="reveal">RIP IT.<br>PULL IT.<br>OWN IT.</h1>
+    <div class="tag reveal">Pokémon Breaks <span>×</span> Live Reveals <span>×</span> Real Pulls</div>
+    <div class="cta-row reveal">
+      <a href="#" class="btn btn-primary">Watch Live</a>
+      <a href="#" class="btn btn-secondary">Schedule</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats reveal">
+    <div class="stat">
+      <div class="num">847</div>
+      <div class="label">Packs Ripped</div>
+    </div>
+    <div class="stat">
+      <div class="num">23</div>
+      <div class="label">Hits This Week</div>
+    </div>
+    <div class="stat">
+      <div class="num">4.9★</div>
+      <div class="label">Buyer Rating</div>
+    </div>
+  </div>
+
+  <!-- NEXT BREAK -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Next <em>Break</em></h2>
+      <a href="#" class="section-link">All →</a>
+    </div>
+
+    <div class="next-break">
+      <div class="break-header">
+        <div class="break-icon">🔥</div>
+        <div class="break-meta">
+          <div class="break-set">Scarlet & Violet · 151</div>
+          <div class="break-title">Booster Box Random Team</div>
+          <div class="break-time">Tonight · 8:00 PM EST</div>
+        </div>
+      </div>
+
+      <div class="countdown" id="countdown">
+        <div class="count-box"><div class="count-num" id="d">02</div><div class="count-lbl">Days</div></div>
+        <div class="count-box"><div class="count-num" id="h">14</div><div class="count-lbl">Hours</div></div>
+        <div class="count-box"><div class="count-num" id="m">37</div><div class="count-lbl">Mins</div></div>
+        <div class="count-box"><div class="count-num" id="s">22</div><div class="count-lbl">Secs</div></div>
+      </div>
+
+      <button class="break-cta">Claim Your Spot →</button>
+    </div>
+  </section>
+
+  <!-- BREAK TYPES -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Break <em>Types</em></h2>
+    </div>
+
+    <div class="types-grid">
+      <div class="type-card type-fire">
+        <span class="price">$15</span>
+        <div class="emoji">🔥</div>
+        <div>
+          <h3>Random<br>Pack</h3>
+          <p>One pack, one shot. Pure adrenaline.</p>
+        </div>
+      </div>
+      <div class="type-card type-water">
+        <span class="price">$45</span>
+        <div class="emoji">💧</div>
+        <div>
+          <h3>Pick Your<br>Player</h3>
+          <p>Choose your fave & we rip for you.</p>
+        </div>
+      </div>
+      <div class="type-card type-electric">
+        <span class="price">$80</span>
+        <div class="emoji">⚡</div>
+        <div>
+          <h3>Booster<br>Box Split</h3>
+          <p>36 packs, 6 spots. Hits get split.</p>
+        </div>
+      </div>
+      <div class="type-card type-psychic">
+        <span class="price">$120</span>
+        <div class="emoji">🔮</div>
+        <div>
+          <h3>Elite<br>Trainer</h3>
+          <p>Full ETB, premium pulls only.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">This <em>Week</em></h2>
+      <a href="#" class="section-link">All →</a>
+    </div>
+
+    <div class="schedule-list">
+      <div class="schedule-item">
+        <div class="sched-date">
+          <div class="sched-day">28</div>
+          <div class="sched-mo">Apr</div>
+        </div>
+        <div class="sched-info">
+          <div class="sched-set">Scarlet & Violet</div>
+          <div class="sched-name">Surging Sparks Box Break</div>
+          <div class="sched-time">Tue · 8:00 PM EST</div>
+        </div>
+        <div class="sched-icon">⚡</div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="sched-date">
+          <div class="sched-day">30</div>
+          <div class="sched-mo">Apr</div>
+        </div>
+        <div class="sched-info">
+          <div class="sched-set">Sword & Shield</div>
+          <div class="sched-name">Crown Zenith ETB Rip</div>
+          <div class="sched-time">Thu · 9:00 PM EST</div>
+        </div>
+        <div class="sched-icon">👑</div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="sched-date">
+          <div class="sched-day">02</div>
+          <div class="sched-mo">May</div>
+        </div>
+        <div class="sched-info">
+          <div class="sched-set">Vintage Vault</div>
+          <div class="sched-name">Base Set Pack Battle</div>
+          <div class="sched-time">Sat · 7:00 PM EST</div>
+        </div>
+        <div class="sched-icon">💎</div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="sched-date">
+          <div class="sched-day">03</div>
+          <div class="sched-mo">May</div>
+        </div>
+        <div class="sched-info">
+          <div class="sched-set">Scarlet & Violet · 151</div>
+          <div class="sched-name">Booster Box Random Team</div>
+          <div class="sched-time">Sun · 8:00 PM EST</div>
+        </div>
+        <div class="sched-icon">🔥</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT BREAKER -->
+  <section class="breaker">
+    <div class="avatar">R</div>
+    <h3>Meet Rock</h3>
+    <div class="handle">@RocksRips on Whatnot</div>
+    <p>Lifelong collector turned full-time breaker. Authentic packs, fair splits, and hype every single rip.</p>
+    <div class="breaker-stats">
+      <div class="bs-item">
+        <div class="bs-num">2.4K</div>
+        <div class="bs-lbl">Followers</div>
+      </div>
+      <div class="bs-item">
+        <div class="bs-num">340+</div>
+        <div class="bs-lbl">Breaks</div>
+      </div>
+      <div class="bs-item">
+        <div class="bs-num">100%</div>
+        <div class="bs-lbl">Ship Rate</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">How It <em>Works</em></h2>
+    </div>
+
+    <div class="how-list">
+      <div class="how-item">
+        <div class="how-num">1</div>
+        <div class="how-text">
+          <h4>Pick Your Break</h4>
+          <p>Choose a slot — random pack, team draft, or full box split.</p>
+        </div>
+      </div>
+      <div class="how-item">
+        <div class="how-num">2</div>
+        <div class="how-text">
+          <h4>Watch Live on Whatnot</h4>
+          <p>Show up to the live stream. Packs ripped on camera, no edits.</p>
+        </div>
+      </div>
+      <div class="how-item">
+        <div class="how-num">3</div>
+        <div class="how-text">
+          <h4>Cards Shipped</h4>
+          <p>Hits packed in penny sleeves & toploaders, shipped within 48 hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIG CTA -->
+  <section class="cta-banner">
+    <h2>READY TO RIP?</h2>
+    <p>Hit the follow button on Whatnot and never miss a break.</p>
+    <a href="#" class="btn btn-primary" style="display:inline-block; padding: 14px 28px; min-width: 220px;">Follow on Whatnot</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-links">
+      <a href="#">Whatnot</a>
+      <a href="#">TikTok</a>
+      <a href="#">Instagram</a>
+    </div>
+    <div class="copyright">
+      © 2026 <span>ROCK'S RIPS</span> · Independent breaker.<br>Not affiliated with Pokémon, Nintendo, or TPCi.
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // Live countdown
+  const target = new Date();
+  target.setDate(target.getDate() + 2);
+  target.setHours(target.getHours() + 14);
+
+  function tick() {
+    const now = new Date();
+    const diff = target - now;
+    if (diff <= 0) return;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('d').textContent = String(d).padStart(2, '0');
+    document.getElementById('h').textContent = String(h).padStart(2, '0');
+    document.getElementById('m').textContent = String(m).padStart(2, '0');
+    document.getElementById('s').textContent = String(s).padStart(2, '0');
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
